@@ -48,7 +48,7 @@ def wishlist(request):
             return redirect('wishlist')
     else:
         form = WishlistForm()
-    items = WishlistForm.objects.filter(user=request.user)
+    items = wishlist.objects.filter(user=request.user)
     return render(request, 'users/wishlist.html', {'form': form, 'items': items})
 
 @login_required

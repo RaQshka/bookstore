@@ -43,6 +43,10 @@ class Role(models.Model):
 
 # Модель User (Пользователи)
 class User(AbstractUser):
+    first_name = models.CharField(max_length=30, null=False)  # Имя
+    last_name = models.CharField(max_length=30, null=False)   # Фамилия
+    patronymic = models.CharField(max_length=30, null=True, blank=True)  # Отчество
+    phone_number = models.CharField(max_length=15, null=True, blank=True)  # Номер телефона
     email = models.EmailField(unique=True, null=False)
     avatar_url = models.URLField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -52,7 +56,7 @@ class User(AbstractUser):
     rating = models.DecimalField(max_digits=3, decimal_places=2, null=True)
 
     USERNAME_FIELD = 'email'  # Используем email для логина
-    REQUIRED_FIELDS = ['username']  # Указываем username как обязательное поле
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']  # Обновлено: добавлены first_name и last_name как обязательные
 
     class Meta:
         db_table = 'User'
@@ -250,7 +254,7 @@ class Review(models.Model):
 # Модель Complaint (Жалобы)
 class Complaint(models.Model):
     reporter = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=False, related_name='complaints_reported')
-    target_user = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=False, related_name='complaints_received')
+    target_user = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=False, related_name='complaints_received')  # Исправлено на target_user
     listing = models.ForeignKey(Listing, on_delete=models.DO_NOTHING, null=True, blank=True)
     message = models.TextField(null=False)
     reason = models.CharField(max_length=255, null=False)
