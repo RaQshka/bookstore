@@ -29,6 +29,7 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
+AUTH_USER_MODEL = 'BookStore.User'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -37,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users.apps.UsersConfig',  # Добавляем приложение users
+    'users.apps.UsersConfig',
+    'BookStore'# Добавляем приложение users
 ]
 
 MIDDLEWARE = [
@@ -81,7 +83,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 # Настройка аутентификации по email
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',

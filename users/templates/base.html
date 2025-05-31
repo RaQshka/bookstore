@@ -1,0 +1,19 @@
+﻿<!-- book_platform/templates/base.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book Platform</title>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'register' %}">Регистрация</a>
+        <a href="{% url 'login' %}">Вход</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'profile' %}">Профиль</a>
+            <a href="{% url 'wishlist' %}">Список желаемого</a>
+            <a href="{% url 'logout' %}">Выход</a>
+        {% endif %}
+    </nav>
+    {% block content %}{% endblock %}
+</body>
+</html>

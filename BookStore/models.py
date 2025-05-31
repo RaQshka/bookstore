@@ -1,87 +1,96 @@
 ﻿from django.db import models
+from django.contrib.auth.models import AbstractUser
 
-# Модель для таблицы City
+# Модель City (Города)
 class City(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, null=False)
 
     class Meta:
         db_table = 'City'
 
-# Модель для таблицы Category
+    def __str__(self):
+        return self.name
+
+# Модель Category (Категории)
 class Category(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, null=False)
 
     class Meta:
         db_table = 'Category'
 
-# Модель для таблицы Tag
+    def __str__(self):
+        return self.name
+
+# Модель Tag (Теги)
 class Tag(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, null=False)
 
     class Meta:
         db_table = 'Tag'
 
-# Модель для таблицы Role
+    def __str__(self):
+        return self.name
+
+# Модель Role (Роли)
 class Role(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50, null=False, unique=True)
 
     class Meta:
         db_table = 'Role'
 
-# Модель для таблицы User
-class User(models.Model):
-    email = models.EmailField(max_length=255, unique=True)
-    password_hash = models.CharField(max_length=255)
-    name = models.CharField(max_length=100)
-    avatar_url = models.CharField(max_length=255, null=True, blank=True)
+    def __str__(self):
+        return self.name
+
+# Модель User (Пользователи)
+class User(AbstractUser):
+    email = models.EmailField(unique=True, null=False)
+    avatar_url = models.URLField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    city = models.ForeignKey(City, on_delete=models.CASCADE)
+    city = models.ForeignKey(City, on_delete=models.CASCADE, null=False)
     registration_date = models.DateTimeField(auto_now_add=True)
-    last_login_date = models.DateTimeField(null=True, blank=True)
     is_banned = models.BooleanField(default=False)
+    rating = models.DecimalField(max_digits=3, decimal_places=2, null=True)
+
+    USERNAME_FIELD = 'email'  # Используем email для логина
+    REQUIRED_FIELDS = ['username']  # Указываем username как обязательное поле
 
     class Meta:
         db_table = 'User'
+        indexes = [models.Index(fields=['email'])]
 
-# Модель для таблицы UserRole
+    def __str__(self):
+        return self.email
+
+# Модель UserRole (Роли пользователей)
 class UserRole(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, null=False)
 
     class Meta:
         db_table = 'UserRole'
         unique_together = ('user', 'role')
 
-# Модель для таблицы Book
-class Book(models.Model):
-    title = models.CharField(max_length=255)
-    author = models.CharField(max_length=100)
+    def __str__(self):
+        return f"{self.user.email} - {self.role.name}"
+
+# Модель Listing (Объявления)
+class Listing(models.Model):
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    title = models.CharField(max_length=255, null=False)
+    author = models.CharField(max_length=100, null=False)
     series = models.CharField(max_length=100, null=True, blank=True)
     number_of_pages = models.IntegerField(null=True, blank=True)
-    isbn = models.CharField(max_length=20, null=True, blank=True, unique=True)
+    isbn = models.CharField(max_length=20, unique=True, null=True, blank=True)
     dimensions = models.CharField(max_length=50, null=True, blank=True)
     publisher = models.CharField(max_length=100, null=True, blank=True)
     cover_type = models.CharField(max_length=50, null=True, blank=True)
     year = models.IntegerField(null=True, blank=True)
     illustrations_type = models.CharField(max_length=50, null=True, blank=True)
-    language = models.CharField(max_length=50)
+    language = models.CharField(max_length=50, null=False)
     description = models.TextField(null=True, blank=True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-
-    class Meta:
-        db_table = 'Book'
-
-# Модель для таблицы Book_Tags
-class BookTags(models.Model):
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-
-    class Meta:
-        db_table = 'Book_Tags'
-        unique_together = ('book', 'tag')
-
-# Модель для таблицы Listing
-class Listing(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=False)
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    is_exchange = models.BooleanField(default=False)
     CONDITION_CHOICES = [
         ('new', 'New'),
         ('like_new', 'Like New'),
@@ -89,135 +98,166 @@ class Listing(models.Model):
         ('fair', 'Fair'),
         ('poor', 'Poor'),
     ]
-    MODERATION_STATUS_CHOICES = [
+    condition = models.CharField(max_length=20, choices=CONDITION_CHOICES, null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    MODERATION_CHOICES = [
         ('pending', 'Pending'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
     ]
+    moderation_status = models.CharField(max_length=20, choices=MODERATION_CHOICES, null=False)
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('sold', 'Sold'),
         ('exchanged', 'Exchanged'),
         ('deleted', 'Deleted'),
     ]
-
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
-    seller = models.ForeignKey(User, on_delete=models.CASCADE)
-    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    posti_exchange = models.BooleanField(default=False)
-    condition = models.CharField(max_length=20, choices=CONDITION_CHOICES)
-    description = models.TextField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    moderation_status = models.CharField(max_length=20, choices=MODERATION_STATUS_CHOICES, default='pending')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, null=False)
     exchange_conditions = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'Listing'
+        indexes = [models.Index(fields=['seller']), models.Index(fields=['status'])]
 
-# Модель для таблицы Listing_Tags
+    def __str__(self):
+        return f"{self.title} by {self.author}"
+
+# Модель Listing_Tags (Теги объявлений)
 class ListingTags(models.Model):
-    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, null=False)
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE, null=False)
 
     class Meta:
         db_table = 'Listing_Tags'
         unique_together = ('listing', 'tag')
 
-# Модель для таблицы Image
+    def __str__(self):
+        return f"{self.listing.title} - {self.tag.name}"
+
+# Модель Image (Изображения)
 class Image(models.Model):
-    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
-    image_url = models.URLField(max_length=255)
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, null=False)
+    image_url = models.URLField(null=False)
 
     class Meta:
         db_table = 'Image'
 
-# Модель для таблицы Wishlist
+    def __str__(self):
+        return self.image_url
+
+# Модель Wishlist (Список желаемого)
 class Wishlist(models.Model):
-    CONDITION_CHOICES = [
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    title = models.CharField(max_length=255, null=True, blank=True)
+    author = models.CharField(max_length=100, null=True, blank=True)
+    language = models.CharField(max_length=50, null=True, blank=True)
+    MIN_CONDITION_CHOICES = [
         ('new', 'New'),
         ('like_new', 'Like New'),
         ('good', 'Good'),
         ('fair', 'Fair'),
         ('poor', 'Poor'),
     ]
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    title = models.CharField(max_length=255, null=True, blank=True)
-    author = models.CharField(max_length=100, null=True, blank=True)
-    language = models.CharField(max_length=50, null=True, blank=True)
-    min_condition = models.CharField(max_length=20, choices=CONDITION_CHOICES, null=True, blank=True)
+    min_condition = models.CharField(max_length=20, choices=MIN_CONDITION_CHOICES, null=True, blank=True)
     max_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    city = models.ForeignKey(City, on_delete=models.DO_NOTHING, null=True, blank=True)
+    city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         db_table = 'Wishlist'
+        indexes = [models.Index(fields=['user'])]
 
-# Модель для таблицы Wishlist_Categories
+    def __str__(self):
+        return f"{self.user.username}'s wishlist"
+
+# Модель Wishlist_Categories (Категории желаемого)
 class WishlistCategories(models.Model):
-    wishlist = models.ForeignKey(Wishlist, on_delete=models.CASCADE)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    wishlist = models.ForeignKey(Wishlist, on_delete=models.CASCADE, null=False)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=False)
 
     class Meta:
         db_table = 'Wishlist_Categories'
         unique_together = ('wishlist', 'category')
 
-# Модель для таблицы Wishlist_Tags
+    def __str__(self):
+        return f"{self.wishlist} - {self.category.name}"
+
+# Модель Wishlist_Tags (Теги желаемого)
 class WishlistTags(models.Model):
-    wishlist = models.ForeignKey(Wishlist, on_delete=models.CASCADE)
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    wishlist = models.ForeignKey(Wishlist, on_delete=models.CASCADE, null=False)
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE, null=False)
 
     class Meta:
         db_table = 'Wishlist_Tags'
         unique_together = ('wishlist', 'tag')
 
-# Модель для таблицы Chat
+    def __str__(self):
+        return f"{self.wishlist} - {self.tag.name}"
+
+# Модель Chat (Чаты)
 class Chat(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.SET_NULL, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=False)
 
     class Meta:
         db_table = 'Chat'
+        indexes = [models.Index(fields=['listing'])]
 
-# Модель для таблицы ChatParticipant
+    def __str__(self):
+        return f"Chat {self.id}"  # Исправлено: chatid не существует, используем id
+
+# Модель ChatParticipant (Участники чата)
 class ChatParticipant(models.Model):
-    chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, null=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
 
     class Meta:
         db_table = 'ChatParticipant'
         unique_together = ('chat', 'user')
 
-# Модель для таблицы Message
+    def __str__(self):
+        return f"{self.user.username} in Chat {self.chat.id}"
+
+# Модель Message (Сообщения)
 class Message(models.Model):
-    chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
-    sender = models.ForeignKey(User, on_delete=models.CASCADE)
-    text = models.TextField()
-    sent_at = models.DateTimeField(auto_now_add=True)
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, null=False)
+    sender = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=False)
+    text = models.TextField(null=False)
+    sent_at = models.DateTimeField(auto_now_add=True, null=False)
     is_read = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'Message'
+        indexes = [models.Index(fields=['chat']), models.Index(fields=['sender'])]
 
-# Модель для таблицы Review
+    def __str__(self):
+        return f"Message from {self.sender.username}"
+
+# Модель Review (Отзывы)
 class Review(models.Model):
-    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='given_reviews')
-    to_user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='received_reviews')
-    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, null=False)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=False)
+    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)], null=False)
     text = models.TextField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=False)
 
     class Meta:
         db_table = 'Review'
+        indexes = [models.Index(fields=['listing'])]
 
-# Модель для таблицы Complaint
+    def __str__(self):
+        return f"Review by {self.user.username} for {self.listing.title}"
+
+# Модель Complaint (Жалобы)
 class Complaint(models.Model):
-    reporter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reported_complaints')
-    target_user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='targeted_complaints')
+    reporter = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=False, related_name='complaints_reported')
+    target_user = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=False, related_name='complaints_received')
     listing = models.ForeignKey(Listing, on_delete=models.DO_NOTHING, null=True, blank=True)
-    message = models.TextField()
-    reason = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
+    message = models.TextField(null=False)
+    reason = models.CharField(max_length=255, null=False)
+    created_at = models.DateTimeField(auto_now_add=True, null=False)
 
     class Meta:
         db_table = 'Complaint'
+
+    def __str__(self):
+        return f"Complaint by {self.reporter.username} on {self.target_user.username}"
