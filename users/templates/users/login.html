@@ -1,0 +1,11 @@
+﻿<!-- book_platform/users/templates/users/login.html -->
+{% extends 'base.html' %}
+{% block content %}
+<h2>Вход</h2>
+<form method="post">
+    {% csrf_token %}
+    <p><label>Email:</label><input type="email" name="email" required></p>
+    <p><label>Пароль:</label><input type="password" name="password" required></p>
+    <button type="submit">Войти</button>
+</form>
+{% endblock %}
