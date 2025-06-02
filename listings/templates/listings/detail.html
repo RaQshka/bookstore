@@ -1,0 +1,109 @@
+﻿{% extends 'base.html' %}
+{% block title %}{{ listing.title }}{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Информация о создателе слева -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if listing.seller.avatar %}
+                        <img src="{{ listing.seller.avatar.url }}" alt="Аватар" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-secondary" style="width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; color: white;">Нет аватара</div>
+                    {% endif %}
+                    <h5 class="mt-2">{{ listing.seller.username }}</h5>
+                    <p><strong>Город:</strong> {{ listing.seller.city.name }}</p>
+                    <p><strong>Рейтинг:</strong> {{ listing.seller.rating|default:"Не оценен" }}</p>
+                    {% if request.user != listing.seller %}
+                        <a href="{% url 'chat:start' listing.pk %}" class="btn btn-primary">Начать чат</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <!-- Детали объявления справа -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h2>{{ listing.title }}</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            {% if listing.images.all %}
+                                <img src="{{ listing.images.first.image.url }}" alt="{{ listing.title }}" class="img-fluid rounded" style="max-width: 100%;">
+                            {% else %}
+                                <p>Изображение отсутствует.</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if listing.author %}
+                                <p><strong>Автор:</strong> {{ listing.author }}</p>
+                            {% endif %}
+                            {% if listing.category %}
+                                <p><strong>Категория:</strong> {{ listing.category.name }}</p>
+                            {% endif %}
+                            {% if listing.language %}
+                                <p><strong>Язык:</strong> {{ listing.language.name }}</p>
+                            {% endif %}
+                            {% if listing.price %}
+                                <p><strong>Цена:</strong> {{ listing.price }}</p>
+                            {% endif %}
+                            {% if listing.condition %}
+                                <p><strong>Состояние:</strong> {{ listing.get_condition_display }}</p>
+                            {% endif %}
+                            {% if listing.series %}
+                                <p><strong>Серия:</strong> {{ listing.series }}</p>
+                            {% endif %}
+                            {% if listing.number_of_pages %}
+                                <p><strong>Количество страниц:</strong> {{ listing.number_of_pages }}</p>
+                            {% endif %}
+                            {% if listing.isbn %}
+                                <p><strong>ISBN:</strong> {{ listing.isbn }}</p>
+                            {% endif %}
+                            {% if listing.dimensions %}
+                                <p><strong>Размеры:</strong> {{ listing.dimensions }}</p>
+                            {% endif %}
+                            {% if listing.publisher %}
+                                <p><strong>Издатель:</strong> {{ listing.publisher }}</p>
+                            {% endif %}
+                            {% if listing.cover_type %}
+                                <p><strong>Тип обложки:</strong> {{ listing.cover_type }}</p>
+                            {% endif %}
+                            {% if listing.year %}
+                                <p><strong>Год:</strong> {{ listing.year }}</p>
+                            {% endif %}
+                            {% if listing.illustrations_type %}
+                                <p><strong>Тип иллюстраций:</strong> {{ listing.illustrations_type }}</p>
+                            {% endif %}
+                            {% if listing.description %}
+                                <p><strong>Описание:</strong> {{ listing.description }}</p>
+                            {% endif %}
+                            {% if listing.tags.all %}
+                                <p><strong>Теги:</strong>
+                                    {% for tag in listing.tags.all %}
+                                        <span class="badge bg-secondary">{{ tag.name }}</span>
+                                    {% endfor %}
+                                </p>
+                            {% endif %}
+                            {% if listing.is_exchange %}
+                                <p><strong>Обмен:</strong> Да</p>
+                                {% if listing.exchange_conditions %}
+                                    <p><strong>Условия обмена:</strong> {{ listing.exchange_conditions }}</p>
+                                {% endif %}
+                            {% endif %}
+                            <a href="{% url 'chat:start_chat' listing.pk %}" class="btn btn-primary mt-2">Начать чат</a>
+
+
+                            {% if request.user == listing.seller %}
+                                <a href="{% url 'listings:edit' listing.pk %}" class="btn btn-primary mt-2">Редактировать</a>
+                                <a href="{% url 'listings:delete' listing.pk %}" class="btn btn-danger mt-2">Удалить</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

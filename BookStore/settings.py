@@ -26,7 +26,8 @@ SECRET_KEY = 'django-insecure-u%8g00-uivlhx$tw#m#0dwu$i*iz-4n64(y%&o^p4+lijfs6_#
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Application definition
 AUTH_USER_MODEL = 'BookStore.User'
@@ -39,9 +40,19 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users.apps.UsersConfig',
-    'BookStore'# Добавляем приложение users
+    'BookStore',
+    'listings',
+    'chat'
+    'channels',
 ]
 
+ASGI_APPLICATION = 'BookStore.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

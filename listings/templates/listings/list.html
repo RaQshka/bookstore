@@ -1,0 +1,75 @@
+﻿{% extends 'base.html' %}
+{% block title %}Список объявлений{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Объявления</h2>
+    <form method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="category" class="form-label">Категория</label>
+                <select name="category" id="category" class="form-select">
+                    <option value="">Все категории</option>
+                    {% for category in categories %}
+                        <option value="{{ category.name }}" {% if request.GET.category == category.name %}selected{% endif %}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="tag" class="form-label">Тег</label>
+                <select name="tag" id="tag" class="form-select">
+                    <option value="">Все теги</option>
+                    {% for tag in tags %}
+                        <option value="{{ tag.name }}" {% if request.GET.tag == tag.name %}selected{% endif %}>{{ tag.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="city" class="form-label">Город</label>
+                <select name="city" id="city" class="form-select">
+                    <option value="">Все города</option>
+                    {% for city in cities %}
+                        <option value="{{ city.name }}" {% if request.GET.city == city.name %}selected{% endif %}>{{ city.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Фильтровать</button>
+    </form>
+
+    <div class="row">
+        {% for listing in listings %}
+            <div class="col-md-6 mb-3">
+                <div class="card d-flex flex-row">
+                    <div class="p-2">
+                        {% if listing.images.all %}
+                            <img src="{{ listing.images.first.image.url }}" alt="{{ listing.title }}" class="rounded" style="width: 150px; height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-secondary rounded" style="width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; color: white;">Нет изображения</div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ listing.title }}</h5>
+                        <p class="card-text mb-1"><strong>Автор:</strong> {{ listing.author }}</p>
+                        <p class="card-text mb-1"><strong>Категория:</strong> {{ listing.category.name }}</p>
+                        <p class="card-text mb-1"><strong>Цена:</strong> {{ listing.price|default:"Обмен" }}</p>
+                        <div class="mt-2">
+                            <strong>Теги:</strong>
+                            {% for tag in listing.tags.all|slice:":3" %}
+                                <span class="badge bg-secondary">{{ tag.name }}</span>
+                            {% endfor %}
+                            {% if listing.tags.count > 3 %}
+                                <span>...</span>
+                            {% endif %}
+                        </div>
+                        <a href="{% url 'listings:detail' listing.pk %}" class="btn btn-primary mt-2">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p>Объявления не найдены.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

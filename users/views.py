@@ -1,9 +1,11 @@
-from django.shortcuts import render
-# book_platform/users/views.py
+# users/views.py
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
-from .forms import RegistrationForm, ProfileForm, WishlistForm
+from django.core.mail import send_mail
+from django.conf import settings
+from .forms import RegistrationForm, ProfileForm
+from BookStore.models import Listing, Review, Complaint
 
 def register(request):
     if request.method == 'POST':
@@ -11,47 +13,51 @@ def register(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('profile')
+            # send_mail(
+            #     'Добро пожаловать!',
+            #     'Спасибо за регистрацию на нашей платформе!',
+            #     settings.DEFAULT_FROM_EMAIL,
+            #     [user.email],
+            #     fail_silently=False,
+            # )
+            return redirect('users:profile')  # Используем пространство имен
     else:
         form = RegistrationForm()
     return render(request, 'users/register.html', {'form': form})
 
 def user_login(request):
     if request.method == 'POST':
-        email = request.POST['email']
+        username = request.POST['username']
         password = request.POST['password']
-        user = authenticate(request, username=email, password=password)  # Исправлено для email
+        user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('profile')
+            return redirect('users:profile')  # Используем пространство имен
+        else:
+            return render(request, 'users/login.html', {'error': 'Неверный логин или пароль'})
     return render(request, 'users/login.html')
 
 @login_required
 def profile(request):
+    user = request.user
+    listings = Listing.objects.filter(seller=user)
+    reviews = Review.objects.filter(to_user=user)
+    complaints = Complaint.objects.filter(target_user=user)
+    context = {
+        'user': user,
+        'listings': listings,
+        'reviews': reviews,
+        'complaints': complaints,
+    }
+    return render(request, 'users/profile.html', context)
+
+@login_required
+def edit_profile(request):
     if request.method == 'POST':
-        form = ProfileForm(request.POST, instance=request.user)
+        form = ProfileForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
-            return redirect('profile')
+            return redirect('users:profile')  # Используем пространство имен
     else:
         form = ProfileForm(instance=request.user)
-    return render(request, 'users/profile.html', {'form': form})
-
-@login_required
-def wishlist(request):
-    if request.method == 'POST':
-        form = WishlistForm(request.POST)
-        if form.is_valid():
-            wishlist_item = form.save(commit=False)
-            wishlist_item.user = request.user
-            wishlist_item.save()
-            return redirect('wishlist')
-    else:
-        form = WishlistForm()
-    items = wishlist.objects.filter(user=request.user)
-    return render(request, 'users/wishlist.html', {'form': form, 'items': items})
-
-@login_required
-def user_logout(request):
-    logout(request)
-    return redirect('login')
+    return render(request, 'users/edit_profile.html', {'form': form})

@@ -1,0 +1,31 @@
+﻿{% extends 'base.html' %}
+{% block title %}Мои чаты{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Мои чаты</h2>
+    {% if chats %}
+        <div class="row">
+            {% for chat in chats %}
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Чат по объявлению: {{ chat.listing.title }}</h5>
+                            <p class="card-text">
+                                <strong>Собеседник:</strong>
+                                {% for participant in chat.chatparticipant_set.all %}
+                                    {% if participant.user != request.user %}
+                                        {{ participant.user.username }}
+                                    {% endif %}
+                                {% endfor %}
+                            </p>
+                            <a href="{% url 'chat:chat_detail' chat.id %}" class="btn btn-primary">Открыть чат</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>У вас нет активных чатов.</p>
+    {% endif %}
+</div>
+{% endblock %}

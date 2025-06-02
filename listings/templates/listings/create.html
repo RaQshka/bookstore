@@ -1,0 +1,60 @@
+﻿{% extends 'base.html' %}
+{% block title %}Создать объявление{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card mx-auto" style="max-width: 600px;">
+        <div class="card-header">
+            <h2>Создать объявление</h2>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% for field in form %}
+                    {% if field.name != 'tags' and field.name != 'image' %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                {{ field.label }}
+                                {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            {{ field }}
+                            {% if field.errors %}
+                                {% for error in field.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                <div class="mb-3">
+                    <label for="id_image" class="form-label">Изображение</label>
+                    <input type="file" name="image" id="id_image" class="form-control" accept="image/*">
+                    <div id="image-preview" class="mt-2"></div>
+                </div>
+                {% include 'listings/_tags_container.html' %}
+                <button type="submit" class="btn btn-primary">Создать</button>
+                <a href="{% url 'listings:list' %}" class="btn btn-secondary">Отмена</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('id_image').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('image-preview');
+                preview.innerHTML = `<img src="${e.target.result}" alt="Предпросмотр" style="max-width: 100%; height: auto;">
+                                     <button type="button" class="btn btn-danger mt-2" onclick="cancelImage()">Отменить</button>`;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    function cancelImage() {
+        document.getElementById('id_image').value = '';
+        document.getElementById('image-preview').innerHTML = '';
+    }
+</script>
+{% endblock %}

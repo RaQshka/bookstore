@@ -1,0 +1,84 @@
+﻿<div class="tags-container mb-3">
+    <label class="form-label">Теги</label>
+    <div class="selected-tags mb-2" id="selected-tags"></div>
+    <div class="tag-list border p-3 rounded" style="max-height: 200px; overflow-y: auto;">
+        {% for choice in form.tags %}
+            <div class="form-check">
+                {{ choice.tag }}
+                <label class="form-check-label" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .selected-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .selected-tag {
+        display: inline-flex;
+        align-items: center;
+        background-color: #e9ecef;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 14px;
+    }
+    .selected-tag .remove-tag {
+        margin-left: 8px;
+        cursor: pointer;
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .tag-list {
+        background-color: #f8f9fa;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tagCheckboxes = document.querySelectorAll('.tag-checkbox');
+        const selectedTagsContainer = document.getElementById('selected-tags');
+
+        tagCheckboxes.forEach(checkbox => {
+            // Инициализация: отображаем уже выбранные теги
+            if (checkbox.checked) {
+                addSelectedTag(checkbox);
+            }
+
+            // Обработка изменения состояния чекбокса
+            checkbox.addEventListener('change', function () {
+                if (this.checked) {
+                    addSelectedTag(this);
+                } else {
+                    removeSelectedTag(this.value);
+                }
+            });
+        });
+
+        function addSelectedTag(checkbox) {
+            const tagValue = checkbox.value;
+            const tagLabel = checkbox.nextElementSibling.textContent;
+            const tagElement = document.createElement('span');
+            tagElement.className = 'selected-tag';
+            tagElement.dataset.value = tagValue;
+            tagElement.innerHTML = `${tagLabel} <span class="remove-tag" data-value="${tagValue}">&times;</span>`;
+            selectedTagsContainer.appendChild(tagElement);
+
+            // Обработчик удаления тега
+            tagElement.querySelector('.remove-tag').addEventListener('click', function () {
+                checkbox.checked = false;
+                removeSelectedTag(tagValue);
+            });
+        }
+
+        function removeSelectedTag(value) {
+            const tagElement = selectedTagsContainer.querySelector(`.selected-tag[data-value="${value}"]`);
+            if (tagElement) {
+                tagElement.remove();
+            }
+        }
+    });
+</script>

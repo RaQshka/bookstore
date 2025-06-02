@@ -1,10 +1,85 @@
-﻿<!-- book_platform/users/templates/users/profile.html -->
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
+{% block title %}Профиль{% endblock %}
 {% block content %}
-<h2>Профиль</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Сохранить</button>
-</form>
+<div class="container mt-4">
+    <div class="row">
+        <!-- Информация о профиле слева -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body d-flex align-items-center">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="Аватар" class="rounded-circle me-3" style="width: 100px; height: 100px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle me-3 bg-secondary" style="width: 100px; height: 100px;"></div>
+                    {% endif %}
+                    <div>
+                        <h3 class="card-title">{{ user.username }}</h3>
+                        <p><strong>Имя:</strong> {{ user.first_name }} {{ user.last_name }} {% if user.patronymic %}{{ user.patronymic }}{% endif %}</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    {% if user.phone_number %}
+                        <p><strong>Телефон:</strong> {{ user.phone_number }}</p>
+                    {% endif %}
+                    <p><strong>Город:</strong> {{ user.city }}</p>
+                    {% if user.description %}
+                        <p><strong>Описание:</strong> {{ user.description }}</p>
+                    {% endif %}
+                    <a href="{% url 'users:edit_profile' %}" class="btn btn-primary mt-3">Редактировать профиль</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Объявления справа -->
+        <div class="col-md-8">
+            <h3>Объявления</h3>
+            {% for listing in listings %}
+                <div class="card mb-3 {% if listing.status in 'deleted,sold,exchanged' %}bg-light text-muted{% elif listing.moderation_status == 'pending' %}bg-warning{% endif %}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ listing.title }}</h5>
+                        <p class="card-text">Автор: {{ listing.author }}</p>
+                        <p class="card-text">Категория: {{ listing.category }}</p>
+                        <p class="card-text">Цена: {{ listing.price|default:"Обмен" }}</p>
+                        <p class="card-text">Статус: {{ listing.get_status_display }}</p>
+                        <p class="card-text">Модерация: {{ listing.get_moderation_status_display }}</p>
+                    </div>
+                </div>
+            {% empty %}
+                <p>У вас нет объявлений.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Отзывы и жалобы ниже -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <h3>Отзывы</h3>
+            {% for review in reviews %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <p><strong>От:</strong> {{ review.from_user.username }}</p>
+                        <p><strong>Рейтинг:</strong> {{ review.rating }}</p>
+                        <p><strong>Текст:</strong> {{ review.text|default:"Нет текста" }}</p>
+                    </div>
+                </div>
+            {% empty %}
+                <p>Нет отзывов.</p>
+            {% endfor %}
+
+            <h3>Жалобы</h3>
+            {% for complaint in complaints %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <p><strong>От:</strong> {{ complaint.reporter.username }}</p>
+                        <p><strong>Причина:</strong> {{ complaint.reason }}</p>
+                        <p><strong>Сообщение:</strong> {{ complaint.message }}</p>
+                    </div>
+                </div>
+            {% empty %}
+                <p>Нет жалоб.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 {% endblock %}
