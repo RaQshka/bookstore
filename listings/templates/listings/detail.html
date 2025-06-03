@@ -15,9 +15,19 @@
                     <h5 class="mt-2">{{ listing.seller.username }}</h5>
                     <p><strong>Город:</strong> {{ listing.seller.city.name }}</p>
                     <p><strong>Рейтинг:</strong> {{ listing.seller.rating|default:"Не оценен" }}</p>
-                    {% if request.user != listing.seller %}
-                        <a href="{% url 'chat:start' listing.pk %}" class="btn btn-primary">Начать чат</a>
+
+                    {% if user.is_authenticated %}
+                        {% if request.user != listing.seller %}
+                            <a href="{% url 'users:profile' user_id=listing.seller.id %}" class="btn btn-danger mt-2">Посмотреть профиль</a>
+                            <a href="{% url 'chat:start_chat' listing.pk %}" class="btn btn-primary mt-2">Начать чат</a>
+                            <a href="{% url 'reviews:submit_review' listing_id=listing.id %}" class="btn btn-primary mt-2">Оставить отзыв</a>
+                            <a href="{% url 'complaints:submit_complaint' %}?listing_id={{ listing.id }}" class="btn btn-danger mt-2">Пожаловаться на объявление</a>
+                        {% endif %}
+                    {% else %}
+                        <p><a href="{% url 'users:login' %}">Войдите</a>, чтобы начать чат.</p>
                     {% endif %}
+
+
                 </div>
             </div>
         </div>
@@ -92,8 +102,6 @@
                                     <p><strong>Условия обмена:</strong> {{ listing.exchange_conditions }}</p>
                                 {% endif %}
                             {% endif %}
-                            <a href="{% url 'chat:start_chat' listing.pk %}" class="btn btn-primary mt-2">Начать чат</a>
-
 
                             {% if request.user == listing.seller %}
                                 <a href="{% url 'listings:edit' listing.pk %}" class="btn btn-primary mt-2">Редактировать</a>

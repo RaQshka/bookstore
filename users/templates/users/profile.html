@@ -16,6 +16,7 @@
                         <h3 class="card-title">{{ user.first_name }}</h3>
                         <p><strong>Имя:</strong> {{ user.first_name }} {{ user.last_name }} {% if user.patronymic %}{{ user.patronymic }}{% endif %}</p>
                     </div>
+
                 </div>
                 <div class="card-body">
                     <p><strong>Email:</strong> {{ user.email }}</p>
@@ -26,41 +27,99 @@
                     {% if user.description %}
                         <p><strong>Описание:</strong> {{ user.description }}</p>
                     {% endif %}
-                    <a href="{% url 'users:edit_profile' %}" class="btn btn-primary mt-3">Редактировать профиль</a>
+                    {% if user.rating %}
+                        <p><strong>Рейтинг:</strong> {{ user.rating|default:"Не оценен"  }}</p>
+                    {% endif %}
+
                 </div>
+                {% if user == request.user %}
+                           <a href="{% url 'users:edit_profile' %}" class="btn btn-primary mt-3">Редактировать профиль</a>
+                    {% endif %}
+                {% if user != request.user %}
+                        <a href="{% url 'complaints:submit_complaint' %}?target_user_id={{ user.id }}" class="btn btn-danger mt-2">Пожаловаться</a>
+                    {% endif %}
             </div>
         </div>
+
 
         <!-- Объявления справа -->
         <div class="col-md-8">
             <h3>Объявления</h3>
             {% for listing in listings %}
                 <div class="card mb-3 {% if listing.status in 'deleted,sold,exchanged' %}bg-light text-muted{% elif listing.moderation_status == 'pending' %}bg-warning{% endif %}">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ listing.title }}</h5>
-                        <p class="card-text">Автор: {{ listing.author }}</p>
-                        <p class="card-text">Категория: {{ listing.category }}</p>
-                        <p class="card-text">Цена: {{ listing.price|default:"Обмен" }}</p>
-                        <p class="card-text">Статус: {{ listing.get_status_display }}</p>
-                        <p class="card-text">Модерация: {{ listing.get_moderation_status_display }}</p>
+                    <div class="card-body d-flex">
+                        <!-- Изображение объявления -->
+                        <div class="p-2">
+                            {% if listing.images.all %}
+                                <img src="{{ listing.images.first.image.url }}" alt="{{ listing.title }}" class="rounded" style="width: 150px; height: 150px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-secondary rounded" style="width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; color: white;">Нет изображения</div>
+                            {% endif %}
+                        </div>
+                        <!-- Информация об объявлении -->
+                        <div class="flex-grow-1">
+                            <h5 class="card-title">
+                                <a href="{% url 'listings:detail' listing.pk %}" class="{% if listing.status in 'deleted,sold,exchanged' %}text-muted{% endif %}">{{ listing.title }}</a>
+                            </h5>
+                            <p class="card-text">Автор: {{ listing.author }}</p>
+                            <p class="card-text">Категория: {{ listing.category }}</p>
+                            <p class="card-text">Цена: {{ listing.price|default:"Обмен" }}</p>
+                            <p class="card-text">Статус: {{ listing.get_status_display }}</p>
+                            <p class="card-text">Модерация: {{ listing.get_moderation_status_display }}</p>
+                        </div>
                     </div>
                 </div>
             {% empty %}
-                <p>У вас нет объявлений.</p>
+                <p>У пользователя нет объявлений.</p>
             {% endfor %}
         </div>
     </div>
-
-    <!-- Отзывы и жалобы ниже -->
-    <div class="row mt-4">
+<div class="row mt-4">
         <div class="col-12">
             <h3>Отзывы</h3>
             {% for review in reviews %}
                 <div class="card mb-3">
                     <div class="card-body">
-                        <p><strong>От:</strong> {{ review.from_user.username }}</p>
-                        <p><strong>Рейтинг:</strong> {{ review.rating }}</p>
-                        <p><strong>Текст:</strong> {{ review.text|default:"Нет текста" }}</p>
+                        <div class="row">
+                            <!-- Слева: краткая сводка об объявлении -->
+                            <div class="col-md-6">
+                                {% if review.listing %}
+                                    <div class="card d-flex flex-row">
+                                        <div class="p-2">
+                                            {% if review.listing.images.all %}
+                                                <img src="{{ review.listing.images.first.image.url }}" alt="{{ review.listing.title }}" class="rounded" style="width: 150px; height: 150px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-secondary rounded" style="width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; color: white;">Нет изображения</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ review.listing.title }}</h5>
+                                            <p class="card-text mb-1"><strong>Автор:</strong> {{ review.listing.author }}</p>
+                                            <p class="card-text mb-1"><strong>Категория:</strong> {{ review.listing.category.name }}</p>
+                                            <p class="card-text mb-1"><strong>Цена:</strong> {{ review.listing.price|default:"Обмен" }}</p>
+                                            <div class="mt-2">
+                                                <strong>Теги:</strong>
+                                                {% for tag in review.listing.tags.all|slice:":3" %}
+                                                    <span class="badge bg-secondary">{{ tag.name }}</span>
+                                                {% endfor %}
+                                                {% if review.listing.tags.count > 3 %}
+                                                    <span>...</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <p>Объявление удалено</p>
+                                {% endif %}
+                            </div>
+                            <!-- Справа: информация об отзыве -->
+                            <div class="col-md-6">
+                                <p><strong>От:</strong> {{ review.from_user.first_name }} {{ review.from_user.last_name }} {% if review.from_user.patronymic %}{{ review.from_user.patronymic }}{% endif %}</p>
+                                <p><strong>Рейтинг:</strong> {{ review.rating }} / 5</p>
+                                <p><strong>Текст:</strong> {{ review.text|default:"Нет текста" }}</p>
+                                <p><small>Дата: {{ review.created_at|date:"d.m.Y H:i" }}</small></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             {% empty %}
@@ -70,10 +129,11 @@
             <h3>Жалобы</h3>
             {% for complaint in complaints %}
                 <div class="card mb-3">
-                    <div class="card-body">
-                        <p><strong>От:</strong> {{ complaint.reporter.username }}</p>
+                    <div class="card-body ">
+                        <p><strong>От:</strong> {{ complaint.reporter.first_name }} {{ complaint.reporter.last_name }} {% if complaint.reporter.patronymic %}{{ complaint.reporter.patronymic }}{% endif %}</p>
                         <p><strong>Причина:</strong> {{ complaint.reason }}</p>
                         <p><strong>Сообщение:</strong> {{ complaint.message }}</p>
+                        <p><small>Дата: {{ complaint.created_at|date:"d.m.Y H:i" }}</small></p>
                     </div>
                 </div>
             {% empty %}

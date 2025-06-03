@@ -123,26 +123,27 @@ class Listing(models.Model):
     is_exchange = models.BooleanField(default=False)
     tags = models.ManyToManyField(Tag, through='ListingTags')
     CONDITION_CHOICES = [
-        ('new', 'New'),
-        ('like_new', 'Like New'),
-        ('good', 'Good'),
-        ('fair', 'Fair'),
-        ('poor', 'Poor'),
+        ('new', 'Новое'),
+        ('like_new', 'Почти новое'),
+        ('good', 'Хорошее'),
+        ('fair', 'Посредственное'),
+        ('poor', 'Плохое'),
     ]
     condition = models.CharField(max_length=20, choices=CONDITION_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     MODERATION_CHOICES = [
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
+        ('pending', 'На модерации'),
+        ('approved', 'Подтверждено'),
+        ('rejected', 'Отказано'),
     ]
     moderation_status = models.CharField(max_length=20, choices=MODERATION_CHOICES)
     STATUS_CHOICES = [
-        ('active', 'Active'),
-        ('sold', 'Sold'),
+        ('active', 'Активное'),
+        ('sold', 'Продано'),
         ('exchanged', 'Exchanged'),
-        ('deleted', 'Deleted'),
+        ('deleted', 'Удалено'),
+
     ]
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     exchange_conditions = models.TextField(null=True, blank=True)
@@ -190,11 +191,11 @@ class Wishlist(models.Model):
     author = models.CharField(max_length=100, null=True, blank=True)
     language = models.CharField(max_length=50, null=True, blank=True)
     MIN_CONDITION_CHOICES = [
-        ('new', 'New'),
-        ('like_new', 'Like New'),
-        ('good', 'Good'),
-        ('fair', 'Fair'),
-        ('poor', 'Poor'),
+        ('new', 'Новое'),
+        ('like_new', 'Почти новое'),
+        ('good', 'Хорошее'),
+        ('fair', 'Посредственное'),
+        ('poor', 'Плохое'),
     ]
     min_condition = models.CharField(max_length=20, choices=MIN_CONDITION_CHOICES, null=True, blank=True)
     max_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -302,9 +303,9 @@ class Review(models.Model):
 
 # Модель Complaint (Жалобы)
 class Complaint(models.Model):
-    reporter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='complaints_reported')  # Изменено на CASCADE
-    target_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='complaints_received')  # Изменено на CASCADE
-    listing = models.ForeignKey(Listing, on_delete=models.SET_NULL, null=True, blank=True)  # Оставлено SET_NULL
+    reporter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='complaints_reported')
+    target_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='complaints_received', null=True, blank=True)
+    listing = models.ForeignKey(Listing, on_delete=models.SET_NULL, null=True, blank=True)
     message = models.TextField()
     reason = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -315,7 +316,8 @@ class Complaint(models.Model):
         verbose_name_plural = 'Жалобы'
 
     def __str__(self):
-        return f"Complaint by {self.reporter.username} on {self.target_user.username}"
+        target = self.target_user.username if self.target_user else f"Listing {self.listing.id}"
+        return f"Complaint by {self.reporter.username} on {target}"
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')

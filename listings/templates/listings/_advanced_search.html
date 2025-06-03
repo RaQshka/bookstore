@@ -1,0 +1,208 @@
+﻿<!-- templates/listings/_advanced_search.html -->
+<div class="modal fade" id="advancedSearchModal" tabindex="-1" aria-labelledby="advancedSearchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="advancedSearchModalLabel">Расширенный поиск</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <!-- Левая часть: поля объявления -->
+                    <div class="col-md-6">
+                        <h6>Обязательные поля</h6>
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Название</label>
+                            <input type="text" name="title" id="title" class="form-control" value="{{ request.GET.title }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="author" class="form-label">Автор</label>
+                            <input type="text" name="author" id="author" class="form-control" value="{{ request.GET.author }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="language" class="form-label">Язык</label>
+                            <input type="text" name="language" id="language" class="form-control" value="{{ request.GET.language }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Категория</label>
+                            <select name="category" id="category" class="form-select">
+                                <option value="">Все категории</option>
+                                {% for category in categories %}
+                                    <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="condition" class="form-label">Состояние</label>
+                            <select name="condition" id="condition" class="form-select">
+                                <option value="">Любое</option>
+                                {% for choice in condition_choices %}
+                                    <option value="{{ choice.0 }}" {% if request.GET.condition == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <h6 class="mt-4">Необязательные поля</h6>
+                        <div class="mb-3">
+                            <label for="series" class="form-label">Серия</label>
+                            <input type="text" name="series" id="series" class="form-control" value="{{ request.GET.series }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="number_of_pages" class="form-label">Количество страниц</label>
+                            <input type="number" name="number_of_pages" id="number_of_pages" class="form-control" value="{{ request.GET.number_of_pages }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="isbn" class="form-label">ISBN</label>
+                            <input type="text" name="isbn" id="isbn" class="form-control" value="{{ request.GET.isbn }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="dimensions" class="form-label">Размеры</label>
+                            <input type="text" name="dimensions" id="dimensions" class="form-control" value="{{ request.GET.dimensions }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="publisher" class="form-label">Издатель</label>
+                            <input type="text" name="publisher" id="publisher" class="form-control" value="{{ request.GET.publisher }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="cover_type" class="form-label">Тип обложки</label>
+                            <input type="text" name="cover_type" id="cover_type" class="form-control" value="{{ request.GET.cover_type }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="year" class="form-label">Год</label>
+                            <input type="number" name="year" id="year" class="form-control" value="{{ request.GET.year }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="illustrations_type" class="form-label">Тип иллюстраций</label>
+                            <input type="text" name="illustrations_type" id="illustrations_type" class="form-control" value="{{ request.GET.illustrations_type }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Описание</label>
+                            <textarea name="description" id="description" class="form-control">{{ request.GET.description }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="price_min" class="form-label">Цена от</label>
+                            <input type="number" step="0.01" name="price_min" id="price_min" class="form-control" value="{{ request.GET.price_min }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="price_max" class="form-label">Цена до</label>
+                            <input type="number" step="0.01" name="price_max" id="price_max" class="form-control" value="{{ request.GET.price_max }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="is_exchange" class="form-label">Обмен</label>
+                            <select name="is_exchange" id="is_exchange" class="form-select">
+                                <option value="">Не важно</option>
+                                <option value="1" {% if request.GET.is_exchange == '1' %}selected{% endif %}>Да</option>
+                                <option value="0" {% if request.GET.is_exchange == '0' %}selected{% endif %}>Нет</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="exchange_conditions" class="form-label">Условия обмена</label>
+                            <textarea name="exchange_conditions" id="exchange_conditions" class="form-control">{{ request.GET.exchange_conditions }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Правая часть: теги и город -->
+                    <div class="col-md-6">
+                        <h6>Теги</h6>
+                        <div class="tags-container mb-3">
+                            <label class="form-label">Теги</label>
+                            <div class="selected-tags mb-2" id="selected-tags"></div>
+                            <div class="tag-list border p-3 rounded" style="max-height: 200px; overflow-y: auto;">
+                                {% for tag in tags %}
+                                    <div class="form-check">
+                                        <input type="checkbox" name="tags" value="{{ tag.id }}" id="tag_{{ tag.id }}" class="form-check-input tag-checkbox" {% if tag.id|stringformat:"s" in selected_tags %}checked{% endif %}>
+                                        <label class="form-check-label" for="tag_{{ tag.id }}">{{ tag.name }}</label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <h6>Город</h6>
+                        <div class="mb-3">
+                            <select name="city" id="city" class="form-select">
+                                <option value="">Все города</option>
+                                {% for city in cities %}
+                                    <option value="{{ city.id }}" {% if request.GET.city == city.id|stringformat:"s" %}selected{% endif %}>{{ city.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button type="submit" class="btn btn-primary">Применить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Стили и скрипты для тегов -->
+<style>
+    .selected-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .selected-tag {
+        display: inline-flex;
+        align-items: center;
+        background-color: #e9ecef;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 14px;
+    }
+    .selected-tag .remove-tag {
+        margin-left: 8px;
+        cursor: pointer;
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .tag-list {
+        background-color: #f8f9fa;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tagCheckboxes = document.querySelectorAll('.tag-checkbox');
+        const selectedTagsContainer = document.getElementById('selected-tags');
+
+        tagCheckboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                addSelectedTag(checkbox);
+            }
+
+            checkbox.addEventListener('change', function () {
+                if (this.checked) {
+                    addSelectedTag(this);
+                } else {
+                    removeSelectedTag(this.value);
+                }
+            });
+        });
+
+        function addSelectedTag(checkbox) {
+            const tagValue = checkbox.value;
+            const tagLabel = checkbox.nextElementSibling.textContent;
+            const tagElement = document.createElement('span');
+            tagElement.className = 'selected-tag';
+            tagElement.dataset.value = tagValue;
+            tagElement.innerHTML = `${tagLabel} <span class="remove-tag" data-value="${tagValue}">×</span>`;
+            selectedTagsContainer.appendChild(tagElement);
+
+            tagElement.querySelector('.remove-tag').addEventListener('click', function () {
+                checkbox.checked = false;
+                removeSelectedTag(tagValue);
+            });
+        }
+
+        function removeSelectedTag(value) {
+            const tagElement = selectedTagsContainer.querySelector(`.selected-tag[data-value="${value}"]`);
+            if (tagElement) {
+                tagElement.remove();
+            }
+        }
+    });
+</script>

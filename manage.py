@@ -20,3 +20,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+# daphne -b 127.0.0.1 -p 8002 BookStore.asgi:application

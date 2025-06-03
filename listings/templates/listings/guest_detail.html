@@ -15,11 +15,17 @@
                     <h5 class="mt-2">{{ listing.seller.username }}</h5>
                     <p><strong>Город:</strong> {{ listing.seller.city.name }}</p>
                     <p><strong>Рейтинг:</strong> {{ listing.seller.rating|default:"Не оценен" }}</p>
+                    <a href="{% url 'users:profile'  %}" class="btn btn-danger mt-2">Посмотреть профиль</a>
+
                     {% if user.is_authenticated %}
                         <a href="{% url 'chat:start_chat' listing.pk %}" class="btn btn-primary">Начать чат</a>
+                        <a href="{% url 'reviews:submit_review' listing_id=listing.id %}" class="btn btn-primary">Оставить отзыв</a>
+
                     {% else %}
                         <p><a href="{% url 'users:login' %}">Войдите</a>, чтобы начать чат.</p>
+
                     {% endif %}
+
                 </div>
             </div>
         </div>

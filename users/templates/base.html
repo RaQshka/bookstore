@@ -17,19 +17,20 @@
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'users:profile' %}">Профиль ({{ user.username }})</a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link btn btn-primary text-black" href="{% url 'listings:create' %}">Создать объявление</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'chat:chat_list' %}">Список чатов</a>
+                            <a class="nav-link btn btn-primary" href="{% url 'chat:chat_list' %}">Список чатов</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'users:logout' %}">Выход</a>
+                            <a id="notification-link" class="nav-link btn btn-primary" href="{% url 'chat:notifications' %}">Уведомления</a>
                         </li>
-
-
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-primary" href="{% url 'users:profile' %}">Профиль ({{ user.username }})</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-primary" href="{% url 'users:logout' %}">Выход</a>
+                        </li>
                     {% else %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'users:register' %}">Регистрация</a>
@@ -46,5 +47,39 @@
         {% block content %}{% endblock %}
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% if user.is_authenticated %}
+            const notificationSocket = new WebSocket(
+                'ws://127.0.0.1:8002/ws/notifications/'
+            );
+
+            notificationSocket.onopen = function() {
+                console.log('Notification WebSocket connected');
+            };
+
+            notificationSocket.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                if (data.type === 'send_notification') {
+                    const notificationLink = document.getElementById('notification-link');
+                    if (notificationLink) {
+                        notificationLink.textContent = 'Новые уведомления';
+                        notificationLink.classList.remove('btn-primary');
+                        notificationLink.classList.add('btn-danger');
+                        notificationLink.style.backgroundColor="red";
+                    }
+                }
+            };
+
+            notificationSocket.onclose = function(e) {
+                console.error('Notification WebSocket closed unexpectedly');
+            };
+
+            notificationSocket.onerror = function(e) {
+                console.error('Notification WebSocket error:', e);
+            };
+            {% endif %}
+        });
+    </script>
 </body>
 </html>

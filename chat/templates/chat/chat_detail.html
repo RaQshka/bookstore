@@ -25,13 +25,13 @@
 </div>
 
 <script>
-    function connectWebSocket() {
+    function connectChatWebSocket() {
         const chatSocket = new WebSocket(
             'ws://127.0.0.1:8002/ws/chat/{{ chat.id }}/'
         );
 
         chatSocket.onopen = function() {
-            console.log('WebSocket connected');
+            console.log('Chat WebSocket connected');
             document.getElementById('error-message').style.display = 'none';
         };
 
@@ -54,13 +54,13 @@
         };
 
         chatSocket.onclose = function(e) {
-            console.error('WebSocket closed unexpectedly');
+            console.error('Chat WebSocket closed unexpectedly');
             showError('Соединение с чатом потеряно. Переподключение...');
-            setTimeout(connectWebSocket, 3000); // Attempt to reconnect after 3 seconds
+            setTimeout(connectChatWebSocket, 3000);
         };
 
         chatSocket.onerror = function(e) {
-            console.error('WebSocket error:', e);
+            console.error('Chat WebSocket error:', e);
             showError('Ошибка соединения с чатом.');
         };
 
@@ -83,6 +83,6 @@
         errorDiv.style.display = 'block';
     }
 
-    connectWebSocket();
+    connectChatWebSocket();
 </script>
 {% endblock %}

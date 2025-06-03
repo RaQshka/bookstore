@@ -4,8 +4,14 @@
 <div class="container mt-4">
     <h2>Объявления</h2>
     <form method="get" class="mb-4">
-        <div class="row">
+        <div class="row align-items-end">
+            <!-- Поле поиска по названию/описанию -->
             <div class="col-md-4">
+                <label for="search" class="form-label">Поиск</label>
+                <input type="text" name="search" id="search" class="form-control" value="{{ request.GET.search }}" placeholder="Название или описание">
+            </div>
+            <!-- Категория -->
+            <div class="col-md-3">
                 <label for="category" class="form-label">Категория</label>
                 <select name="category" id="category" class="form-select">
                     <option value="">Все категории</option>
@@ -14,28 +20,18 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-4">
-                <label for="tag" class="form-label">Тег</label>
-                <select name="tag" id="tag" class="form-select">
-                    <option value="">Все теги</option>
-                    {% for tag in tags %}
-                        <option value="{{ tag.name }}" {% if request.GET.tag == tag.name %}selected{% endif %}>{{ tag.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label for="city" class="form-label">Город</label>
-                <select name="city" id="city" class="form-select">
-                    <option value="">Все города</option>
-                    {% for city in cities %}
-                        <option value="{{ city.name }}" {% if request.GET.city == city.name %}selected{% endif %}>{{ city.name }}</option>
-                    {% endfor %}
-                </select>
+            <!-- Кнопки -->
+            <div class="col-md-5">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#advancedSearchModal">Расширенный поиск</button>
+                <button type="submit" class="btn btn-primary ms-2">Фильтровать</button>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary mt-3">Фильтровать</button>
+
+        <!-- Модальное окно для расширенного поиска -->
+        {% include 'listings/_advanced_search.html' with tags=tags cities=cities selected_tags=selected_tags condition_choices=condition_choices categories=categories %}
     </form>
 
+    <!-- Список объявлений -->
     <div class="row">
         {% for listing in listings %}
             <div class="col-md-6 mb-3">
@@ -72,4 +68,15 @@
         {% endfor %}
     </div>
 </div>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#tags').select2({
+            placeholder: "Выберите теги",
+            allowClear: true
+        });
+    });
+</script>
 {% endblock %}

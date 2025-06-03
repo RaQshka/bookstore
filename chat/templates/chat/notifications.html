@@ -1,0 +1,22 @@
+﻿{% extends 'base.html' %}
+{% block title %}Уведомления{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Уведомления</h2>
+    {% if notifications %}
+        <ul class="list-group">
+            {% for notification in notifications %}
+                <li class="list-group-item">
+                    <a href="{% url 'chat:chat_detail' notification.message.chat.id %}">
+                        Новое сообщение от {{ notification.message.sender.username }} 
+                        в чате по объявлению {{ notification.message.chat.listing.title }}
+                    </a>
+                    <small>({{ notification.created_at|date:"d.m.Y H:i" }})</small>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Нет новых уведомлений.</p>
+    {% endif %}
+</div>
+{% endblock %}

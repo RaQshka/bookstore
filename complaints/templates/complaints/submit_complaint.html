@@ -1,0 +1,17 @@
+﻿{% extends 'base.html' %}
+{% block title %}Пожаловаться{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Подача жалобы</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {% if request.GET.target_user_id %}
+            <input type="hidden" name="target_user_id" value="{{ request.GET.target_user_id }}">
+        {% elif request.GET.listing_id %}
+            <input type="hidden" name="listing_id" value="{{ request.GET.listing_id }}">
+        {% endif %}
+        <button type="submit" class="btn btn-primary">Отправить</button>
+    </form>
+</div>
+{% endblock %}
