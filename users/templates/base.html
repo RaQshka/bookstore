@@ -23,8 +23,13 @@
                             <a class="nav-link btn btn-primary text-black" href="{% url 'listings:create' %}">Создать объявление</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="{% url 'chat:chat_list' %}">Список чатов</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="{% url 'users:logout' %}">Выход</a>
                         </li>
+
+
                     {% else %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'users:register' %}">Регистрация</a>

@@ -42,8 +42,8 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'BookStore',
     'listings',
-    'chat'
     'channels',
+    'chat',
 ]
 
 ASGI_APPLICATION = 'BookStore.asgi.application'

@@ -13,7 +13,7 @@
                         <div class="rounded-circle me-3 bg-secondary" style="width: 100px; height: 100px;"></div>
                     {% endif %}
                     <div>
-                        <h3 class="card-title">{{ user.username }}</h3>
+                        <h3 class="card-title">{{ user.first_name }}</h3>
                         <p><strong>Имя:</strong> {{ user.first_name }} {{ user.last_name }} {% if user.patronymic %}{{ user.patronymic }}{% endif %}</p>
                     </div>
                 </div>

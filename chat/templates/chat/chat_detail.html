@@ -1,11 +1,11 @@
 ﻿{% extends 'base.html' %}
-{% block title %}Чат{% endblock %}
+{% block title %}Чат по объявлению{% endblock %}
 {% block content %}
 <div class="container mt-4">
     <h2>Чат по объявлению: {{ chat.listing.title }}</h2>
     <div class="card">
         <div class="card-body">
-            <div id="messages" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;">
+            <div id="messages" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px; padding: 10px;">
                 {% for message in messages %}
                     <div style="margin-bottom: 10px; padding: 10px; border-radius: 5px; {% if message.sender == request.user %}background-color: #e9ecef; text-align: right;{% else %}background-color: #f8f9fa; text-align: left;{% endif %}">
                         <p><strong>{{ message.sender.username }}</strong> ({{ message.sent_at|date:"d.m.Y H:i" }}):</p>
@@ -13,9 +13,11 @@
                     </div>
                 {% endfor %}
             </div>
+            <div id="error-message" class="alert alert-danger" style="display: none;"></div>
             <form id="message-form">
-                {% csrf_token %}
-                {{ form.as_p }}
+                <div class="form-group">
+                    <textarea id="id_text" class="form-control" rows="3" placeholder="Введите сообщение..."></textarea>
+                </div>
                 <button type="submit" class="btn btn-primary">Отправить</button>
             </form>
         </div>
@@ -23,35 +25,64 @@
 </div>
 
 <script>
-    const chatSocket = new WebSocket(
-        'ws://' + window.location.host + '/ws/chat/' + {{ chat.id }} + '/'
-    );
+    function connectWebSocket() {
+        const chatSocket = new WebSocket(
+            'ws://127.0.0.1:8002/ws/chat/{{ chat.id }}/'
+        );
 
-    chatSocket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        const messagesDiv = document.getElementById('messages');
-        const messageHtml = `
-            <div style="margin-bottom: 10px; padding: 10px; border-radius: 5px; background-color: #f8f9fa; text-align: left;">
-                <p><strong>${data.sender}</strong> (${data.sent_at}):</p>
-                <p>${data.message}</p>
-            </div>
-        `;
-        messagesDiv.innerHTML += messageHtml;
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    };
+        chatSocket.onopen = function() {
+            console.log('WebSocket connected');
+            document.getElementById('error-message').style.display = 'none';
+        };
 
-    chatSocket.onclose = function(e) {
-        console.error('Chat socket closed unexpectedly');
-    };
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            if (data.error) {
+                showError(data.error);
+                return;
+            }
+            const messagesDiv = document.getElementById('messages');
+            const isCurrentUser = data.sender === '{{ request.user.username }}';
+            const messageHtml = `
+                <div style="margin-bottom: 10px; padding: 10px; border-radius: 5px; ${isCurrentUser ? 'background-color: #e9ecef; text-align: right;' : 'background-color: #f8f9fa; text-align: left;'}">
+                    <p><strong>${data.sender}</strong> (${data.sent_at}):</p>
+                    <p>${data.message}</p>
+                </div>
+            `;
+            messagesDiv.innerHTML += messageHtml;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        };
 
-    document.getElementById('message-form').onsubmit = function(e) {
-        e.preventDefault();
-        const messageInput = document.querySelector('#id_text');
-        const message = messageInput.value;
-        chatSocket.send(JSON.stringify({
-            'message': message
-        }));
-        messageInput.value = '';
-    };
+        chatSocket.onclose = function(e) {
+            console.error('WebSocket closed unexpectedly');
+            showError('Соединение с чатом потеряно. Переподключение...');
+            setTimeout(connectWebSocket, 3000); // Attempt to reconnect after 3 seconds
+        };
+
+        chatSocket.onerror = function(e) {
+            console.error('WebSocket error:', e);
+            showError('Ошибка соединения с чатом.');
+        };
+
+        document.getElementById('message-form').onsubmit = function(e) {
+            e.preventDefault();
+            const messageInput = document.querySelector('#id_text');
+            const message = messageInput.value.trim();
+            if (message && chatSocket.readyState === WebSocket.OPEN) {
+                chatSocket.send(JSON.stringify({
+                    'message': message
+                }));
+                messageInput.value = '';
+            }
+        };
+    }
+
+    function showError(message) {
+        const errorDiv = document.getElementById('error-message');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
+
+    connectWebSocket();
 </script>
 {% endblock %}
