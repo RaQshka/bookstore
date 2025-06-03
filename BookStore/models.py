@@ -184,7 +184,6 @@ class Image(models.Model):
     def __str__(self):
         return f"Image for {self.listing.title}"
 
-# Модель Wishlist (Список желаемого)
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=255, null=True, blank=True)
@@ -198,8 +197,20 @@ class Wishlist(models.Model):
         ('poor', 'Плохое'),
     ]
     min_condition = models.CharField(max_length=20, choices=MIN_CONDITION_CHOICES, null=True, blank=True)
-    max_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    price_min = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    price_max = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True)
+    series = models.CharField(max_length=100, null=True, blank=True)
+    number_of_pages = models.IntegerField(null=True, blank=True)
+    isbn = models.CharField(max_length=20, null=True, blank=True)
+    dimensions = models.CharField(max_length=50, null=True, blank=True)
+    publisher = models.CharField(max_length=100, null=True, blank=True)
+    cover_type = models.CharField(max_length=50, null=True, blank=True)
+    year = models.IntegerField(null=True, blank=True)
+    illustrations_type = models.CharField(max_length=50, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    is_exchange = models.BooleanField(null=True, blank=True)
+    exchange_conditions = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'Wishlist'
@@ -213,7 +224,7 @@ class Wishlist(models.Model):
 # Модель Wishlist_Categories (Категории желаемого)
 class WishlistCategories(models.Model):
     wishlist = models.ForeignKey(Wishlist, on_delete=models.CASCADE)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='category_links')
 
     class Meta:
         db_table = 'Wishlist_Categories'
@@ -226,7 +237,7 @@ class WishlistCategories(models.Model):
 
 # Модель Wishlist_Tags (Теги желаемого)
 class WishlistTags(models.Model):
-    wishlist = models.ForeignKey(Wishlist, on_delete=models.CASCADE)
+    wishlist = models.ForeignKey(Wishlist, on_delete=models.CASCADE, related_name='tag_links')
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
 
     class Meta:
@@ -321,7 +332,9 @@ class Complaint(models.Model):
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
-    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='notifications')
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='notifications', null=True, blank=True)
+    listing = models.ForeignKey(Listing, on_delete=models.SET_NULL, related_name='notifications',null=True, blank=True)
+
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -331,4 +344,9 @@ class Notification(models.Model):
         verbose_name_plural = 'Уведомления'
 
     def __str__(self):
-        return f"Уведомление для {self.user.username} о сообщении {self.message.id}"
+        if self.message:
+            return f"Уведомление для {self.user.username} о сообщении {self.message.id}"
+        elif self.listing:
+            return f"Уведомление для {self.user.username} о новом объявлении {self.listing.id}"
+        else:
+            return f"Уведомление для {self.user.username}"

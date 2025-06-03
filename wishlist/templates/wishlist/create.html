@@ -1,0 +1,42 @@
+﻿{% extends 'base.html' %}
+{% block title %}Создать список желаемого{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Создать новый список желаемого</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Обязательные поля</h6>
+                <div class="mb-3">{{ form.title.label_tag }} {{ form.title }}</div>
+                <div class="mb-3">{{ form.author.label_tag }} {{ form.author }}</div>
+                <div class="mb-3">{{ form.language.label_tag }} {{ form.language }}</div>
+                <div class="mb-3">{{ form.min_condition.label_tag }} {{ form.min_condition }}</div>
+                <div class="mb-3">{{ form.categories.label_tag }} {{ form.categories }}</div>
+                <h6 class="mt-4">Необязательные поля</h6>
+                <div class="mb-3">{{ form.series.label_tag }} {{ form.series }}</div>
+                <div class="mb-3">{{ form.number_of_pages.label_tag }} {{ form.number_of_pages }}</div>
+                <div class="mb-3">{{ form.isbn.label_tag }} {{ form.isbn }}</div>
+                <div class="mb-3">{{ form.dimensions.label_tag }} {{ form.dimensions }}</div>
+                <div class="mb-3">{{ form.publisher.label_tag }} {{ form.publisher }}</div>
+                <div class="mb-3">{{ form.cover_type.label_tag }} {{ form.cover_type }}</div>
+                <div class="mb-3">{{ form.year.label_tag }} {{ form.year }}</div>
+                <div class="mb-3">{{ form.illustrations_type.label_tag }} {{ form.illustrations_type }}</div>
+                <div class="mb-3">{{ form.description.label_tag }} {{ form.description }}</div>
+                <div class="mb-3">{{ form.price_min.label_tag }} {{ form.price_min }}</div>
+                <div class="mb-3">{{ form.price_max.label_tag }} {{ form.price_max }}</div>
+                <div class="mb-3">{{ form.is_exchange.label_tag }} {{ form.is_exchange }}</div>
+                <div class="mb-3">{{ form.exchange_conditions.label_tag }} {{ form.exchange_conditions }}</div>
+            </div>
+            <div class="col-md-6">
+                <h6>Теги</h6>
+                {% include 'listings/_tags_container.html' with form=form %}
+                <h6>Город</h6>
+                <div class="mb-3">{{ form.city.label_tag }} {{ form.city }}</div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="{% url 'wishlist:list' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+﻿{% extends 'base.html' %}
+{% block title %}Список желаемого{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Мои списки желаемого</h2>
+    {% for wishlist in wishlists %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{{ wishlist.title|default:"Без названия" }}</h5>
+            <h6>Обязательные поля</h6>
+            <p><strong>Автор:</strong> {{ wishlist.author|default:"Любой" }}</p>
+            <p><strong>Язык:</strong> {{ wishlist.language|default:"Любой" }}</p>
+            <p><strong>Минимальное состояние:</strong> {{ wishlist.get_min_condition_display|default:"Любое" }}</p>
+            <p><strong>Категории:</strong> {% for wc in wishlist.categories.all %}{{ wc.name }}{% if not forloop.last %}, {% endif %}{% empty %}Любые{% endfor %}</p>
+
+            <a href="{% url 'wishlist:edit' wishlist.id %}" class="btn btn-primary">Редактировать</a>
+            <a href="{% url 'wishlist:delete' wishlist.id %}" class="btn btn-danger">Удалить</a>
+        </div>
+    </div>
+    {% empty %}
+    <p>У вас нет списков желаемого.</p>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+﻿{% extends 'base.html' %}
+{% block title %}Удалить список желаемого{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Удалить список желаемого</h2>
+    <p>Вы уверены, что хотите удалить "{{ wishlist.title|default:'Без названия' }}"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Удалить</button>
+        <a href="{% url 'wishlist:list'  %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

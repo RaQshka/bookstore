@@ -37,6 +37,8 @@ def user_login(request):
             return render(request, 'users/login.html', {'error': 'Неверный логин или пароль'})
     return render(request, 'users/login.html')
 
+
+#TODO: сделать так, чтобы другие пользователи не видели скрытые обхявления (не обработанные)
 @login_required
 def profile(request, user_id=None):
     if user_id:

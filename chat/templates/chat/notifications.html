@@ -6,11 +6,16 @@
     {% if notifications %}
         <ul class="list-group">
             {% for notification in notifications %}
-                <li class="list-group-item">
-                    <a href="{% url 'chat:chat_detail' notification.message.chat.id %}">
-                        Новое сообщение от {{ notification.message.sender.username }} 
-                        в чате по объявлению {{ notification.message.chat.listing.title }}
-                    </a>
+                <li class="list-group-item {% if not notification.is_read %}list-group-item-warning{% endif %}">
+                    {% if notification.message %}
+                        <a href="{% url 'chat:chat_detail' notification.message.chat.id %}">
+                            Новое сообщение от {{ notification.message.sender.username }} в чате по объявлению {{ notification.message.chat.listing.title }}
+                        </a>
+                    {% elif notification.listing %}
+                        <a href="{% url 'listings:detail' notification.listing.id %}">
+                            Новое объявление "{{ notification.listing.title }}" соответствует вашему списку желаемого
+                        </a>
+                    {% endif %}
                     <small>({{ notification.created_at|date:"d.m.Y H:i" }})</small>
                 </li>
             {% endfor %}

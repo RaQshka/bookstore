@@ -12,14 +12,14 @@
             </div>
             <!-- Категория -->
             <div class="col-md-3">
-                <label for="category" class="form-label">Категория</label>
-                <select name="category" id="category" class="form-select">
-                    <option value="">Все категории</option>
-                    {% for category in categories %}
-                        <option value="{{ category.name }}" {% if request.GET.category == category.name %}selected{% endif %}>{{ category.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+            <label for="category" class="form-label">Категория</label>
+            <select name="category" id="category" class="form-select">
+                <option value="">Все категории</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
             <!-- Кнопки -->
             <div class="col-md-5">
                 <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#advancedSearchModal">Расширенный поиск</button>
@@ -66,6 +66,7 @@
                 <p>Объявления не найдены.</p>
             </div>
         {% endfor %}
+        <a href="{% url 'wishlist:add_from_search' %}?{{ request.GET.urlencode }}" class="btn btn-secondary">Добавить фильтр в список желаемого</a>
     </div>
 </div>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />

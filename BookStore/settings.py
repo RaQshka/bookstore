@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'chat',
     'reviews',
     'complaints',
+    'wishlist',
 ]
 
 ASGI_APPLICATION = 'BookStore.asgi.application'
