@@ -20,7 +20,8 @@ def create_listing(request):
             return redirect('listings:list')
     else:
         form = ListingForm()
-    return render(request, 'listings/create.html', {'form': form})
+    categories = Category.objects.all()  # Добавляем категории
+    return render(request, 'listings/create.html', {'form': form, 'categories': categories})
 
 @login_required
 def edit_listing(request, pk):

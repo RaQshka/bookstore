@@ -3,35 +3,7 @@
 {% block content %}
 <div class="container mt-4">
     <div class="row">
-        <!-- Информация о создателе слева -->
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    {% if listing.seller.avatar %}
-                        <img src="{{ listing.seller.avatar.url }}" alt="Аватар" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
-                    {% else %}
-                        <div class="rounded-circle bg-secondary" style="width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; color: white;">Нет аватара</div>
-                    {% endif %}
-                    <h5 class="mt-2">{{ listing.seller.username }}</h5>
-                    <p><strong>Город:</strong> {{ listing.seller.city.name }}</p>
-                    <p><strong>Рейтинг:</strong> {{ listing.seller.rating|default:"Не оценен" }}</p>
-
-                    {% if user.is_authenticated %}
-                        {% if request.user != listing.seller %}
-                            <a href="{% url 'users:profile' user_id=listing.seller.id %}" class="btn btn-danger mt-2">Посмотреть профиль</a>
-                            <a href="{% url 'chat:start_chat' listing.pk %}" class="btn btn-primary mt-2">Начать чат</a>
-                            <a href="{% url 'reviews:submit_review' listing_id=listing.id %}" class="btn btn-primary mt-2">Оставить отзыв</a>
-                            <a href="{% url 'complaints:submit_complaint' %}?listing_id={{ listing.id }}" class="btn btn-danger mt-2">Пожаловаться на объявление</a>
-                        {% endif %}
-                    {% else %}
-                        <p><a href="{% url 'users:login' %}">Войдите</a>, чтобы начать чат.</p>
-                    {% endif %}
-
-
-                </div>
-            </div>
-        </div>
-        <!-- Детали объявления справа -->
+        <!-- Детали объявления слева -->
         <div class="col-md-9">
             <div class="card">
                 <div class="card-header">
@@ -54,7 +26,7 @@
                                 <p><strong>Категория:</strong> {{ listing.category.name }}</p>
                             {% endif %}
                             {% if listing.language %}
-                                <p><strong>Язык:</strong> {{ listing.language.name }}</p>
+                                <p><strong>Язык:</strong> {{ listing.language }}</p>
                             {% endif %}
                             {% if listing.price %}
                                 <p><strong>Цена:</strong> {{ listing.price }}</p>
@@ -101,14 +73,40 @@
                                 {% if listing.exchange_conditions %}
                                     <p><strong>Условия обмена:</strong> {{ listing.exchange_conditions }}</p>
                                 {% endif %}
+                            {% else %}
+                                <p><strong>Обмен:</strong> Нет</p>
                             {% endif %}
-
                             {% if request.user == listing.seller %}
                                 <a href="{% url 'listings:edit' listing.pk %}" class="btn btn-primary mt-2">Редактировать</a>
                                 <a href="{% url 'listings:delete' listing.pk %}" class="btn btn-danger mt-2">Удалить</a>
                             {% endif %}
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+        <!-- Информация о создателе справа -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if listing.seller.avatar %}
+                        <img src="{{ listing.seller.avatar.url }}" alt="Аватар" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-secondary" style="width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; color: white;">Нет аватара</div>
+                    {% endif %}
+                    <h5 class="mt-2">{{ listing.seller.username }}</h5>
+                    <p><strong>Город:</strong> {{ listing.seller.city.name }}</p>
+                    <p><strong>Рейтинг:</strong> {{ listing.seller.rating|default:"Не оценен" }}</p>
+                    {% if user.is_authenticated %}
+                        {% if request.user != listing.seller %}
+                            <a href="{% url 'users:profile' user_id=listing.seller.id %}" class="btn btn-danger mt-2">Посмотреть профиль</a>
+                            <a href="{% url 'chat:start_chat' listing.pk %}" class="btn btn-primary mt-2">Начать чат</a>
+                            <a href="{% url 'reviews:submit_review' listing_id=listing.id %}" class="btn btn-primary mt-2">Оставить отзыв</a>
+                            <a href="{% url 'complaints:submit_complaint' %}?listing_id={{ listing.id }}" class="btn btn-danger mt-2">Пожаловаться на объявление</a>
+                        {% endif %}
+                    {% else %}
+                        <p><a href="{% url 'users:login' %}">Войдите</a>, чтобы начать чат.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>

@@ -3,6 +3,31 @@ from BookStore.models import Listing, Category, Tag
 
 
 class ListingForm(forms.ModelForm):
+    LANGUAGE_CHOICES = [
+        ('ru', 'Русский'),
+        ('en', 'Английский'),
+        ('de', 'Немецкий'),
+        ('fr', 'Французский'),
+        ('es', 'Испанский'),
+        ('it', 'Итальянский'),
+        ('zh', 'Китайский'),
+        ('ja', 'Японский'),
+        ('ko', 'Корейский'),
+        ('ar', 'Арабский'),
+        ('pl', 'Польский'),
+        ('uk', 'Украинский'),
+        ('be', 'Белорусский'),
+        ('cs', 'Чешский'),
+        ('sk', 'Словацкий'),
+        ('bg', 'Болгарский'),
+        ('sr', 'Сербский'),
+        ('hr', 'Хорватский'),
+        ('sl', 'Словенский'),
+        ('mk', 'Македонский'),
+    ]
+
+    language = forms.ChoiceField(choices=LANGUAGE_CHOICES, required=True, label='Язык')
+
     category = forms.ModelChoiceField(queryset=Category.objects.all(), label="Категория")
     tags = forms.ModelMultipleChoiceField(
         queryset=Tag.objects.all(),
@@ -38,3 +63,4 @@ class ListingForm(forms.ModelForm):
             'condition': forms.Select(attrs={'class': 'form-select'}),
             'exchange_conditions': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
         }
+
