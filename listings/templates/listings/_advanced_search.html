@@ -79,7 +79,12 @@
                             <label for="description" class="form-label">Описание</label>
                             <textarea name="description" id="description" class="form-control">{{ request.GET.description }}</textarea>
                         </div>
-                        <div class="mb-3">
+
+                    </div>
+
+                    <!-- Правая часть: теги и город -->
+                    <div class="col-md-6">
+                                           <div class="mb-3">
                             <label for="price_min" class="form-label">Цена от</label>
                             <input type="number" step="0.01" name="price_min" id="price_min" class="form-control" value="{{ request.GET.price_min }}">
                         </div>
@@ -99,11 +104,6 @@
                             <label for="exchange_conditions" class="form-label">Условия обмена</label>
                             <textarea name="exchange_conditions" id="exchange_conditions" class="form-control">{{ request.GET.exchange_conditions }}</textarea>
                         </div>
-                    </div>
-
-                    <!-- Правая часть: теги и город -->
-                    <div class="col-md-6">
-                        <h6>Теги</h6>
                         <div class="tags-container mb-3">
                             <label class="form-label">Теги</label>
                             <div class="selected-tags mb-2" id="selected-tags"></div>
